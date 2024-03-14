@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -14,11 +16,16 @@ import lombok.Data;
 public class Student {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "student_Id")
+	@Column(name = "id")
+	
 	private Long id;
 	
-	@Column(name = "student_Name")
+	@Column(name = "name")
 	private String name;	
-	@Column(name = "student_Age")
+	 
+	@Column(name = "phonenumber")
+	private String phoneNumber;
+	
+	@Column(name = "age")
 	private Integer age;	
 }
