@@ -3,6 +3,7 @@ package com.menghour.student.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.menghour.student.dto.PageDto;
 import com.menghour.student.dto.StudentDto;
 import com.menghour.student.entity.Student;
 import com.menghour.student.exception.ErrorResponse;
@@ -53,13 +55,23 @@ public class StudentController {
 		return ResponseEntity.ok(new ErrorResponse(HttpStatus.OK,"successful"));
 	}
 
-	/*
-	 @GetMapping public ResponseEntity<?> getStudents(){ return
-	 ResponseEntity.ok(studentService.getStudents()); }
-	 */
-	@GetMapping
+	
+	@GetMapping 
+	public ResponseEntity<?> getStudents(){ 
+		return ResponseEntity.ok(studentService.getStudents()); 
+	}
+	 
+	@GetMapping("v2/")
 	public ResponseEntity<?> getStudentsBySpecification(@RequestParam Map<String, String> params){
 		return ResponseEntity.ok(studentService.getBrandsBySpecification(params));
-
 	}
+ 
+	@GetMapping("v3/")
+	public ResponseEntity<?> getStudentsBySpecAndPage(@RequestParam Map<String, String> params){
+		
+		Page<Student> pageStudent = studentService.getBrandsBySpecificationAndPagination(params);
+		PageDto pageDto=new PageDto(pageStudent);
+			
+		return ResponseEntity.ok(pageDto);
+		}
 }
