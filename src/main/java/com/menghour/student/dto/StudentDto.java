@@ -24,7 +24,9 @@ public class StudentDto {
 	 @Length(min = 1, max = 20)
 	private String phoneNumber;
 	 
-	 @Min(18)
-	 @Max(60)
-	private Integer age;
+	 //@Min(18)
+	 //@Max(60)
+	 @Min(value = 18, message ="Age has to be greater than or equal to 18")
+	 @Max(value = 60, message ="Age has to be less than or equal to 60")
+	 private Integer age;
 }

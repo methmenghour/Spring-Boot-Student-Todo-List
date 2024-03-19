@@ -2,6 +2,7 @@ package com.menghour.student.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -37,9 +38,15 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	public Student update(Long id, Student studentUpdate) {
 		Student student= getById(id);
+
 		student.setName(studentUpdate.getName());
-		student.setAge(studentUpdate.getAge());
-		student.setPhoneNumber(studentUpdate.getPhoneNumber());
+		
+        if(Objects.nonNull(studentUpdate.getAge())) {
+    		student.setAge(studentUpdate.getAge());
+        }
+        if(Objects.nonNull(studentUpdate.getPhoneNumber())) {
+    		student.setPhoneNumber(studentUpdate.getPhoneNumber());
+        }
 		return studentRepository.save(student);
 	}
 	@Override
