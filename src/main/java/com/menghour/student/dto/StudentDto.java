@@ -28,5 +28,6 @@ public class StudentDto {
 	 //@Max(60)
 	 @Min(value = 18, message ="Age has to be greater than or equal to 18")
 	 @Max(value = 60, message ="Age has to be less than or equal to 60")
+	 @NotNull(message = "Student age is not Null")
 	 private Integer age;
 }

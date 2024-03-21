@@ -14,4 +14,3 @@ public interface StudentMapper {
 	 @Mapping(target = "id", ignore = true)
 	 StudentDto studentToStudentDto(Student student);
 }
-

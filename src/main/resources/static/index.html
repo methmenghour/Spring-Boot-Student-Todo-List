@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Student TodoList</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script src="
+https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.js
+"></script>
+<link href="
+https://cdn.jsdelivr.net/npm/jquery-toast-plugin@1.3.2/dist/jquery.toast.min.css
+" rel="stylesheet">
+
+<script>
+$(document).ready(function() {
+listStudent();
+});
+
+function seachStudent(){
+		var name = $('#searchStudentName').val(); 	               
+	$.get('http://localhost:8080/students/v2/?name='+name, function (result) { 
+           if (result.status==200) { 
+               displayStudentList(result.data);
+            } else { 
+                  toastErrorMessage(result.message);
+            } 
+        });    
+   }
+function listStudent() 
+    { 
+        $.get('http://localhost:8080/students', function (result) { 
+           if (result.status==200) { 
+               displayStudentList(result.data);
+            } else { 
+                  toastErrorMessage(result.message);
+            } 
+        });       
+    }
+    function displayStudentList(list) { 
+		var count_row = 1; 
+        $('#studentTable tbody').empty(); 
+ 
+        for (var i=0; i < list.length; i++) { 
+            $('#studentTable tbody').append( 
+                '<tr>' + 
+                '<td >' + count_row + '</td>' + 
+                '<td >' + list[i].name + '</td>' + 
+                '<td >' + list[i].age + '</td>' + 
+                '<td >' + list[i].phoneNumber + '</td>' + 
+                 
+                '<td>'+
+				'<button type="submit" class="btn btn-danger" onclick="actionDeleteStudent(' + list[i].id + ')" >Delete</button>' + 
+                ' <button type="submit" onclick="actionEditStudent(' + list[i].id + ')" class="btn btn-success ms-1">Edit</button>'
+                +'</td>'+ 
+                '</tr>'); 
+                count_row++; 
+        } 
+    }
+    function actionEditStudent(id){
+		$.get('http://localhost:8080/students/'+id, function (result) { 	
+            $('#studentName').val(result.data.name); 
+            $('#studentAge').val(result.data.age); 
+            $('#studentPhoneNumber').val(result.data.phoneNumber); 
+            $('#studentId').val(result.data.id);       
+            showModalStudent();          
+        }); 
+	} 
+	function saveAndUpdateStudent() { 
+        var name = $('#studentName').val(); 
+        var age = $('#studentAge').val(); 
+        var phoneNumber = $('#studentPhoneNumber').val(); 
+        var id = $('#studentId').val(); 
+ 	    if(id==''|| id==null)
+	    {
+		createStudent(name,age,phoneNumber);	 	
+		}else{	
+	      updateStudent(id,name,age,phoneNumber)
+	    }
+   }
+	function createStudent(name,age,phoneNumber){
+		 $.post({
+		    url:'http://localhost:8080/students',
+		    data: JSON.stringify({name: name,age: age,phoneNumber:phoneNumber}),
+		    contentType: "application/json",
+		    success: function(response) {
+			listStudent();
+		    removeStudent();
+            hideModalStudent();
+			toastSuccessMessage(response.message);
+		    },
+		    error:function(xhr, status, error) {
+			toastErrorMessage(xhr.responseJSON.message);
+		    }
+		});
+	}
+
+	function updateStudent(id,name,age,phoneNumber){
+		$.ajax({
+			url: 'http://localhost:8080/students/'+id,
+		    type: "PUT",
+		    data: JSON.stringify({name: name,age: age,phoneNumber:phoneNumber}),
+   			contentType: "application/json", // Correct content type
+    		success: function(response) {
+		    listStudent();
+		    removeStudent();
+            hideModalStudent();
+            toastSuccessMessage(response.message);
+		},
+	    error:function(xhr, status, error) {
+            toastErrorMessage(xhr.responseJSON.message);  
+			}
+		});
+	}  
+  function actionDeleteStudent(id){
+	   $('#studentDeleteId').val(id); 
+	   $("#showDeleteStudent").modal('show'); 
+  }
+  function deleteStudent(){
+	  	  var id= $('#studentDeleteId').val(); 
+	  	  	$.ajax({
+			url: 'http://localhost:8080/students/'+id,
+		    type: "Delete",
+   			contentType: "application/json", // Correct content type
+    		success: function(response) {
+		    listStudent();
+		    $('#studentDeleteId').val(''); 
+		    $("#showDeleteStudent").modal('hide');        
+            toastSuccessMessage(response.message);
+		},
+	    error:function(xhr, status, error) {
+            toastErrorMessage(xhr.responseJSON.message);  
+			}
+		});
+
+  } 
+  function toastErrorMessage(message){
+	  $.toast({
+		heading: 'Error',
+		text:message,
+	    showHideTransition: 'slide',
+		bgColor : '#DE3163',// Background color for toast
+        textColor : 'White',
+	    icon: 'error',
+		position : 'top-right' 
+		});
+	}
+  function toastSuccessMessage(message){
+		$.toast({
+		heading:'Success',
+		text:message,
+		showHideTransition: 'slide',
+		bgColor : '#31DE77', // Background color for toast
+		textColor : 'White',
+		position : 'top-right',
+		icon: 'success',
+		});
+  }
+  function showModalStudent(){
+		$("#showUpdateStudent").modal('show'); 
+  }
+   function hideModalStudent(){
+		$("#showUpdateStudent").modal('hide'); 
+  }  
+  function removeStudent(){
+		$('#studentName').val(''); 
+		$('#studentAge').val(''); 
+        $('#studentPhoneNumber').val(''); 
+        $('#studentId').val('');  	         
+	} 
+</script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Student</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="#">Home</a>
+        </li>
+      </ul>
+       <div class="d-flex">
+        <input class="form-control me-2" type="search" id="searchStudentName" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success" onclick='seachStudent()'>Search</button>
+      </div>
+    </div>
+  </div>
+</nav>
+<section class="h-auto" style="background-color: #eee;">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col col-lg-9 col-xl-10">
+        <div class="card rounded-3">
+          <div class="card-body p-4">
+            <h4 class="text-center my-3 pb-3">Student Todo-List</h4>
+                <button type="submit" class="btn btn-primary" onclick='showModalStudent()'>Add</button>
+            <table class="table mb-4" id="studentTable">
+              <thead>
+                <tr>
+                  <th scope="col">No.</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Age</th>
+                  <th scope="col">Phone Number</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="showUpdateStudent" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showUpdateStudent" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="removeStudent()"></button>
+      </div>
+      <div class="modal-body">
+		  <div class="row form-group"> 
+             <div class="col-md-3 mt-2"> 
+                 <label for="studentId">ID</label> 
+              </div> 
+              <div class="col-md-9"> 
+                  <input type="text" class="form-control" id="studentId" name="studentId" value="" required="" readonly /> 
+              </div> 
+          </div> 
+         <div class="row form-group mt-2"> 
+             <div class="col-md-3 mt-2"> 
+                 <label for="studentName">Name <span style="color:red">(*)</span></label> 
+              </div> 
+              <div class="col-md-9"> 
+                  <input type="text" class="form-control" id="studentName" name="studentName" value="" required /> 
+              </div> 
+          </div> 
+          <div class="row form-group mt-2"> 
+             <div class="col-md-3 mt-2"> 
+                 <label for="studentAge">Age <span style="color:red">(*)</span></label> 
+              </div> 
+              <div class="col-md-9"> 
+                  <input type="number" class="form-control" id="studentAge" name="studentAge" value=""/> 
+              </div> 
+          </div> 
+           <div class="row form-group mt-2"> 
+             <div class="col-md-3"> 
+                 <label for="studentPhoneNumber">Phone Number</label> 
+              </div> 
+              <div class="col-md-9"> 
+                  <input type="text" class="form-control" id="studentPhoneNumber" name="studentPhoneNumber" value=""/> 
+              </div> 
+          </div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-bs-dismiss="modal" onclick="removeStudent()">Close</button>
+        <button type="button" class="btn btn-success" onclick='saveAndUpdateStudent()'>Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--  modal Delete -->
+<!-- Modal -->
+<div class="modal fade" id="showDeleteStudent" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showDeleteStudent" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+     <div class="modal-body">
+		 <div class="row form-group" hidden> 
+             <div class="col-md-3 mt-2"> 
+                 <label for="studentDeleteId">ID</label> 
+              </div> 
+              <div class="col-md-9"> 
+                  <input type="text" class="form-control" id="studentDeleteId" name="studentDeleteId" value="" required="" readonly /> 
+              </div> 
+          </div> 
+        <h5>Do you want to delete ?</h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" onclick='deleteStudent()'>Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
