@@ -22,24 +22,32 @@ listStudent();
 });
 
 function seachStudent(){
-		var name = $('#searchStudentName').val(); 	               
-	$.get('http://localhost:8080/students/v2/?name='+name, function (result) { 
-           if (result.status==200) { 
-               displayStudentList(result.data);
-            } else { 
-                  toastErrorMessage(result.message);
-            } 
-        });    
+    var name = $('#searchStudentName').val(); 
+     $.ajax({
+			url: 'http://localhost:8080/students/v2/?name='+name,
+		    type: "GET",
+   			contentType: "application/json", // Correct content type
+    		success: function(response) {
+		     displayStudentList(response.data);
+		},
+	    error:function(xhr, status, error) {
+            toastErrorMessage(xhr.responseJSON.message);  
+			}
+		});   
    }
 function listStudent() 
     { 
-        $.get('http://localhost:8080/students', function (result) { 
-           if (result.status==200) { 
-               displayStudentList(result.data);
-            } else { 
-                  toastErrorMessage(result.message);
-            } 
-        });       
+		$.ajax({
+			url: 'http://localhost:8080/students',
+		    type: "GET",
+   			contentType: "application/json", // Correct content type
+    		success: function(response) {
+		     displayStudentList(response.data);
+		},
+	    error:function(xhr, status, error) {
+            toastErrorMessage(xhr.responseJSON.message);  
+			}
+		});  
     }
     function displayStudentList(list) { 
 		var count_row = 1; 
@@ -62,13 +70,21 @@ function listStudent()
         } 
     }
     function actionEditStudent(id){
-		$.get('http://localhost:8080/students/'+id, function (result) { 	
-            $('#studentName').val(result.data.name); 
-            $('#studentAge').val(result.data.age); 
-            $('#studentPhoneNumber').val(result.data.phoneNumber); 
-            $('#studentId').val(result.data.id);       
-            showModalStudent();          
-        }); 
+	  	  	$.ajax({
+			url: 'http://localhost:8080/students/'+id,
+		    type: "GET",
+   			contentType: "application/json", // Correct content type
+    		success: function(response) {
+		    $('#studentName').val(response.data.name); 
+            $('#studentAge').val(response.data.age); 
+            $('#studentPhoneNumber').val(response.data.phoneNumber); 
+            $('#studentId').val(response.data.id);       
+            showModalStudent();   
+		},
+	    error:function(xhr, status, error) {
+            toastErrorMessage(xhr.responseJSON.message);  
+			}
+		});
 	} 
 	function saveAndUpdateStudent() { 
         var name = $('#studentName').val(); 
